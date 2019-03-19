@@ -37,3 +37,10 @@ print(resp[0].RoundTripTime)
 ```
 
 For example of working ping utility see [winping/main.py](winping/main.py).
+
+## Limitations
+
+* Works only on Windows XP and newer.
+* No asyncio support at this moment, but you may run ping in thread executor.
+* Only IPv4 supported at this moment.
+* Alpha-software: library API may change.
