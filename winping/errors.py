@@ -55,7 +55,7 @@ class OptionTooBig(IcmpException):
 class BadDestination(IcmpException):
     pass
 
-class GeneralFailure(IcmpException)
+class GeneralFailure(IcmpException):
     pass
 
 errno_map = {

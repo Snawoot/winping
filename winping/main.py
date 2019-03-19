@@ -1,6 +1,8 @@
 import sys
 import time
 import argparse
+import socket
+import os
 
 from .ping import *
 from .errors import *

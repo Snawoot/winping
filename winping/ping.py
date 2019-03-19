@@ -6,7 +6,7 @@ import os
 
 from .errors import *
 
-__all__ = [ping, IcmpHandle, IpOptionInformation, IcmpEchoReply]
+__all__ = ['ping', 'IcmpHandle', 'IpOptionInformation', 'IcmpEchoReply']
 
 
 INVALID_HANDLE_VALUE = ctypes.c_void_p(-1).value
