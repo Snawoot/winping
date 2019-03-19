@@ -1,9 +1,12 @@
 import ctypes
 import ctypes.wintypes
-import argparse
 import socket
 import struct
 import os
+
+from .errors import *
+
+__all__ = [ping, IcmpHandle, IpOptionInformation, IcmpEchoReply]
 
 
 INVALID_HANDLE_VALUE = ctypes.c_void_p(-1).value
@@ -92,7 +95,10 @@ IcmpCloseHandle.errcheck = IcmpCloseHandle_errcheck
 def IcmpSendEcho_errcheck(res, func, args):
     if res == 0:
         errno = GetLastError()
-        raise OSError(0, "IcmpSendEcho failed", None, errno)
+        if errno in errno_map:
+            raise errno_map[errno](0, "IcmpSendEcho failed", None, errno)
+        else:
+            raise OSError(0, "IcmpSendEcho failed", None, errno)
     return args
 
 
@@ -119,71 +125,18 @@ IcmpSendEcho.errcheck = IcmpSendEcho_errcheck
 
 
 class IcmpHandle(object):
-    def __enter__(self):
+    def __init__(self):
         self.handle = IcmpCreateFile()
+
+    def __enter__(self):
         return self.handle
+
     def __exit__(self, exc_type, exc_value, exc_tb):
         IcmpCloseHandle(self.handle)
 
 
 def inet_addr(ip):
     return IPAddr(struct.unpack("L", socket.inet_aton(ip))[0])
-
-
-def check_positive_int(value):
-    value = int(value)
-    if value <= 0:
-         raise argparse.ArgumentTypeError(
-             "%s is an invalid positive number value" % value)
-    return value
-
-
-def check_nonnegative_int(value):
-    value = int(value)
-    if value < 0:
-         raise argparse.ArgumentTypeError(
-             "%s is an invalid non-negative number value" % value)
-    return value
-
-
-def check_size(value):
-    value = int(value)
-    if not (0 <= value <= 65500):
-         raise argparse.ArgumentTypeError(
-             "Bad data size, valid range is from 0 to 65500)")
-    return value
-
-
-def parse_args():
-    parser = argparse.ArgumentParser(
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument("address",
-                        help="specifies the host name or IP address of the "
-                        "destination")
-    parser.add_argument("-w",
-                        help="timeout in milliseconds to wait for each reply",
-                        type=check_positive_int,
-                        dest="timeout",
-                        default=1000)
-    parser.add_argument("-l",
-                        help="timeout in seconds to wait for each reply",
-                        type=check_size,
-                        dest="size",
-                        default=32)
-    
-    count_group = parser.add_mutually_exclusive_group()
-    count_group.add_argument("-t",
-                             help="ping the specified host until stopped",
-                             dest="infinite",
-                             action="store_true")
-    count_group.add_argument("-n",
-                             help="number of echo requests to send",
-                             type=check_positive_int,
-                             dest="count",
-                             default=4)
-    
-    args = parser.parse_args()
-    return args
 
 
 def ping(handle, address, *, timeout=1000, data=None, expected_count=10):
@@ -207,78 +160,3 @@ def ping(handle, address, *, timeout=1000, data=None, expected_count=10):
     replies = [ IcmpEchoReply(r) for r in replies ]
     
     return replies
-
-
-def main():
-    import sys
-    import time
-    args = parse_args()
-    ip = socket.gethostbyname(args.address)
-    data = os.urandom(args.size)
-    count = args.count
-    
-    print("\nPinging %s [%s] with %d bytes of data:" %
-              (args.address, ip, len(data)))
-
-    requests = 0
-    responses = 0
-    lost = 0
-    min_rtt = float("+inf")
-    max_rtt = float("-inf")
-    sum_rtt = 0
-    
-    try:
-        with IcmpHandle() as handle:
-            while True:
-                count -= 1
-                try:
-                    res = ping(handle, ip, timeout=args.timeout, data=data)
-                except OSError as e:
-                    if e.errno == 11010:
-                        requests += 1
-                        lost += 1
-                    else:
-                        print("Error: %s", (e,), file=sys.stderr)
-                else:
-                    requests += 1
-                    for rep in res:
-                        if rep.Status == 0:
-                            rtt = rep.RoundTripTime
-                            max_rtt = max(max_rtt, rtt)
-                            min_rtt = min(min_rtt, rtt)
-                            sum_rtt += rtt
-                            print("Reply from %s: bytes=%d time=%dms TTL=%d" %
-                                (rep.Address,
-                                 len(rep.Data),
-                                 rtt,
-                                 rep.Options.Ttl))
-                            if rep.Data != data:
-                                print("Corrupted packet!", file=sys.stderr)
-                            responses += 1
-                        else:
-                            lost += 1
-                finally:
-                    if not args.infinite and count <= 0:
-                        break
-                time.sleep(1)
-    except KeyboardInterrupt:
-        pass
-
-    if requests:
-        print("\nPing statistics for %s:" % (ip,))
-        print("    Packets: Sent = %d, Received = %d, Lost = %d (%.2f%% loss)," % (
-            requests,
-            responses,
-            lost,
-            100 * lost / requests))
-    if responses:
-        print("Approximate round trip times in milli-seconds:")
-        print("    Minimum = %dms, Maximum = %dms, Average = %sms" %
-              (min_rtt,
-               max_rtt,
-               int(round(sum_rtt / responses))))
-        
-
-
-if __name__=='__main__':
-    main()
