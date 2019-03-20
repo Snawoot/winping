@@ -7,7 +7,7 @@ with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
 
 setup(name='winping',
       version='0.1.0',
-      description="Web-server which produces infinite chunked-encoded responses",
+      description="Ping implementation which utilizes Windows ICMP API",
       url='https://github.com/Snawoot/winping',
       author='Vladislav Yarmak',
       author_email='vladislav-ex-src@vm-0.com',

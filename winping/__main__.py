@@ -31,6 +31,7 @@ def parse_args():
         return value
 
     parser = argparse.ArgumentParser(
+        description="Ping implementation which utilizes Windows ICMP API",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument("address",
                         help="specifies the host name or IP address of the "

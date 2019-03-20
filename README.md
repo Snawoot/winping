@@ -17,6 +17,8 @@ Standard Python package installation.
 C:\>winping --help
 usage: winping [-h] [-w TIMEOUT] [-l SIZE] [-t | -n COUNT] address
 
+Ping implementation which utilizes Windows ICMP API
+
 positional arguments:
   address     specifies the host name or IP address of the destination
 
