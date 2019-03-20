@@ -21,7 +21,7 @@ setup(name='winping',
       ],
       entry_points={
           'console_scripts': [
-              'winping=winping.main:main',
+              'winping=winping.__main__:main',
           ],
       },
       classifiers=[

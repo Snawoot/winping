@@ -4,7 +4,7 @@ import argparse
 import socket
 import os
 
-from .ping import *
+from . import *
 from .errors import *
 
 
@@ -126,3 +126,6 @@ def main():
               (min_rtt,
                max_rtt,
                int(round(sum_rtt / responses))))
+
+if __name__ == '__main__':
+    main()
