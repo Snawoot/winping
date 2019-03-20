@@ -1,6 +1,6 @@
 PYTHON = python3
 RM = rm
-PKG_NAME = postfix_mta_sts_resolver
+PKG_NAME = winping
 
 PRJ_DIR = $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 VENV ?= $(PRJ_DIR)venv
