@@ -11,6 +11,26 @@ Standard Python package installation.
 
 ### Utility
 
+#### Synopsis
+
+```
+C:\>winping --help
+usage: winping [-h] [-w TIMEOUT] [-l SIZE] [-t | -n COUNT] address
+
+positional arguments:
+  address     specifies the host name or IP address of the destination
+
+optional arguments:
+  -h, --help  show this help message and exit
+  -w TIMEOUT  timeout in milliseconds to wait for each reply (default: 1000)
+  -l SIZE     timeout in seconds to wait for each reply (default: 32)
+  -t          ping the specified host until stopped (default: False)
+  -n COUNT    number of echo requests to send (default: 4)
+
+```
+
+#### Example
+
 ```
 C:\>winping google.com
 
@@ -27,16 +47,18 @@ Approximate round trip times in milli-seconds:
 
 ```
 
+Also, if python scripts are not in your system path, you may run it like this: `python -m winping`
+
 ### Library
 
 ```python3
-from winping.ping import *
-with IcmpHandle() as h:
-    resp = ping(h, '8.8.8.8')
+import winping
+with winping.IcmpHandle() as h:
+    resp = winping.ping(h, '8.8.8.8')
 print(resp[0].RoundTripTime)
 ```
 
-For example of working ping utility see [winping/main.py](winping/main.py).
+For example of working ping utility see [winping/\_\_main\_\_.py](winping/__main__.py).
 
 ## Limitations
 
