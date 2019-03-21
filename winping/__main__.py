@@ -57,6 +57,17 @@ def parse_args():
                              type=check_positive_int,
                              dest="count",
                              default=4)
+
+    proto_group = parser.add_mutually_exclusive_group()
+    proto_group.add_argument("-4",
+                             help="force using IPv4",
+                             dest="force_ipv4",
+                             action="store_true")
+    proto_group.add_argument("-6",
+                             help="force using IPv6",
+                             dest="force_ipv6",
+                             action="store_true")
+    
     
     args = parser.parse_args()
     return args
@@ -64,7 +75,19 @@ def parse_args():
 
 def main():
     args = parse_args()
-    ip = socket.gethostbyname(args.address)
+    ai_list = socket.getaddrinfo(args.address, 0)
+    if (args.force_ipv4 or args.force_ipv6):
+        target_af = socket.AF_INET if args.force_ipv4 else socket.AF_INET6
+        ai_list = [ai for ai in ai_list if ai[0] == target_af]
+    if not ai_list:
+        print("Ping request could not find host %s. "
+              "Please check the name and try again." % (args.address),
+              file=sys.stderr)
+        exit(3)
+    ip = ai_list[0][4][0]
+    af = ai_list[0][0]
+    ping_fun, Handle = ((ping, IcmpHandle) if af == socket.AF_INET
+                        else (ping6, Icmp6Handle))
     data = os.urandom(args.size)
     count = args.count
     
@@ -79,16 +102,16 @@ def main():
     sum_rtt = 0
     
     try:
-        with IcmpHandle() as handle:
+        with Handle() as handle:
             while True:
                 count -= 1
                 try:
-                    res = ping(handle, ip, timeout=args.timeout, data=data)
+                    res = ping_fun(handle, ip, timeout=args.timeout, data=data)
                 except RequestTimedOut:
                     requests += 1
                     lost += 1
                 except OSError as e:
-                    print("Error: %s", (e,), file=sys.stderr)
+                    print("Error: ", (e,), file=sys.stderr)
                 else:
                     requests += 1
                     for rep in res:
@@ -97,13 +120,17 @@ def main():
                             max_rtt = max(max_rtt, rtt)
                             min_rtt = min(min_rtt, rtt)
                             sum_rtt += rtt
-                            print("Reply from %s: bytes=%d time=%dms TTL=%d" %
-                                (rep.Address,
-                                 len(rep.Data),
-                                 rtt,
-                                 rep.Options.Ttl))
-                            if rep.Data != data:
-                                print("Corrupted packet!", file=sys.stderr)
+                            if af == socket.AF_INET:
+                                print("Reply from %s: bytes=%d time=%dms TTL=%d" %
+                                    (rep.Address,
+                                     len(rep.Data),
+                                     rtt,
+                                     rep.Options.Ttl))
+                                if rep.Data != data:
+                                    print("Corrupted packet!", file=sys.stderr)
+                            else:
+                                print("Reply from %s: time=%dms" %
+                                      (rep.Address, rtt))
                             responses += 1
                         else:
                             lost += 1

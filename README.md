@@ -15,7 +15,7 @@ Standard Python package installation.
 
 ```
 C:\>winping --help
-usage: winping [-h] [-w TIMEOUT] [-l SIZE] [-t | -n COUNT] address
+usage: winping [-h] [-w TIMEOUT] [-l SIZE] [-t | -n COUNT] [-4 | -6] address
 
 Ping implementation which utilizes Windows ICMP API
 
@@ -28,6 +28,8 @@ optional arguments:
   -l SIZE     timeout in seconds to wait for each reply (default: 32)
   -t          ping the specified host until stopped (default: False)
   -n COUNT    number of echo requests to send (default: 4)
+  -4          force using IPv4 (default: False)
+  -6          force using IPv6 (default: False)
 
 ```
 
@@ -47,6 +49,19 @@ Ping statistics for 172.217.20.206:
 Approximate round trip times in milli-seconds:
     Minimum = 24ms, Maximum = 29ms, Average = 26ms
 
+C:\Users\IEUser\winping>winping -6 google.com
+
+Pinging google.com [2a00:1450:401b:804::200e] with 32 bytes of data:
+Reply from 2a00:1450:401b:804::200e: time=79ms
+Reply from 2a00:1450:401b:804::200e: time=77ms
+Reply from 2a00:1450:401b:804::200e: time=76ms
+Reply from 2a00:1450:401b:804::200e: time=75ms
+
+Ping statistics for 2a00:1450:401b:804::200e:
+    Packets: Sent = 4, Received = 4, Lost = 0 (0.00% loss),
+Approximate round trip times in milli-seconds:
+    Minimum = 75ms, Maximum = 79ms, Average = 77ms
+
 ```
 
 Also, if python scripts are not in your system path, you may run it like this: `python -m winping`
@@ -58,6 +73,9 @@ import winping
 with winping.IcmpHandle() as h:
     resp = winping.ping(h, '8.8.8.8')
 print(resp[0].RoundTripTime)
+with winping.Icmp6Handle() as h:
+    resp = winping.ping6(h, '2a00:1450:401b:804::200e')
+print(resp[0].RoundTripTime)
 ```
 
 For example of working ping utility see [winping/\_\_main\_\_.py](winping/__main__.py).
@@ -66,5 +84,3 @@ For example of working ping utility see [winping/\_\_main\_\_.py](winping/__main
 
 * Works only on Windows XP and newer.
 * No asyncio support at this moment, but you may run ping in thread executor.
-* Only IPv4 supported at this moment.
-* Alpha-software: library API may change.
