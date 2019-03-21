@@ -42,7 +42,7 @@ def parse_args():
                         dest="timeout",
                         default=1000)
     parser.add_argument("-l",
-                        help="timeout in seconds to wait for each reply",
+                        help="number of data bytes to be sent",
                         type=check_size,
                         dest="size",
                         default=32)
@@ -68,7 +68,6 @@ def parse_args():
                              dest="force_ipv6",
                              action="store_true")
     
-    
     args = parser.parse_args()
     return args
 
@@ -83,7 +82,7 @@ def main():
         print("Ping request could not find host %s. "
               "Please check the name and try again." % (args.address),
               file=sys.stderr)
-        exit(3)
+        sys.exit(3)
     ip = ai_list[0][4][0]
     af = ai_list[0][0]
     ping_fun, Handle = ((ping, IcmpHandle) if af == socket.AF_INET
