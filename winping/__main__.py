@@ -42,7 +42,7 @@ def parse_args():
                         dest="timeout",
                         default=1000)
     parser.add_argument("-l",
-                        help="timeout in seconds to wait for each reply",
+                        help="number of data bytes to be sent",
                         type=check_size,
                         dest="size",
                         default=32)
@@ -67,7 +67,6 @@ def parse_args():
                              help="force using IPv6",
                              dest="force_ipv6",
                              action="store_true")
-    
     
     args = parser.parse_args()
     return args
