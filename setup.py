@@ -6,7 +6,7 @@ with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 setup(name='winping',
-      version='0.2.1',
+      version='0.2.3',
       description="Ping implementation which utilizes Windows ICMP API",
       url='https://github.com/Snawoot/winping',
       author='Vladislav Yarmak',
