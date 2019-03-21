@@ -83,7 +83,7 @@ def main():
         print("Ping request could not find host %s. "
               "Please check the name and try again." % (args.address),
               file=sys.stderr)
-        exit(3)
+        sys.exit(3)
     ip = ai_list[0][4][0]
     af = ai_list[0][0]
     ping_fun, Handle = ((ping, IcmpHandle) if af == socket.AF_INET
