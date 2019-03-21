@@ -49,7 +49,7 @@ Ping statistics for 172.217.20.206:
 Approximate round trip times in milli-seconds:
     Minimum = 24ms, Maximum = 29ms, Average = 26ms
 
-C:\Users\IEUser\winping>winping -6 google.com
+C:\>winping -6 google.com
 
 Pinging google.com [2a00:1450:401b:804::200e] with 32 bytes of data:
 Reply from 2a00:1450:401b:804::200e: time=79ms
