@@ -25,7 +25,7 @@ positional arguments:
 optional arguments:
   -h, --help  show this help message and exit
   -w TIMEOUT  timeout in milliseconds to wait for each reply (default: 1000)
-  -l SIZE     timeout in seconds to wait for each reply (default: 32)
+  -l SIZE     number of data bytes to be sent (default: 32)
   -t          ping the specified host until stopped (default: False)
   -n COUNT    number of echo requests to send (default: 4)
   -4          force using IPv4 (default: False)
@@ -82,5 +82,5 @@ For example of working ping utility see [winping/\_\_main\_\_.py](winping/__main
 
 ## Limitations
 
-* Works only on Windows XP and newer.
+* Works only on Windows XP / Windows Server 2003 and newer.
 * No asyncio support at this moment, but you may run ping in thread executor.
